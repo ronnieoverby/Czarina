@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<samples>
+  <states>
+    <state>
+      <name>New York</name>
+      <abbr>NY</abbr>
+      <cities>
+        <city>Manhattan</city>
+        <city>Queens</city>
+        <city>Bronx</city>
+        <city>Staten Island</city>
+        <city>Brooklyn</city>
+      </cities>
+    </state>
+    <state>
+      <name>North Carolina</name>
+      <abbr>NC</abbr>
+      <cities>
+        <city>Greensboro</city>
+        <city>Durham</city>
+        <city>Raleigh</city>
+        <city>Charlotte</city>
+        <city>Winston-Salem</city>
+      </cities>
+    </state>
+  </states>
+</samples>
