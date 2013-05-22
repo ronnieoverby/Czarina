@@ -8,94 +8,97 @@ namespace Czarina.Tests
 {
     public class RepeatTests
     {
-        private Random r = RandomHelper.Instance;
+        private readonly string[] _people = new[] {"Ronnie", "Shane", "Brittney", "Tina", "Anna", "Lukus"};
 
         [Test]
-        public void test()
+        public void CanRepeatMyName()
         {
-            var seq = new[] { "Ronnie", "Shane", "Brittney", "Anna", "Tina", "Lukus" };
-
-            var repSeq = seq.RepeatEach(x => 5).ToArray();
+            const string name = "Ronnie";
+            var arr = new[] {name, name, name};
+            Assert.True(name.Repeat().Take(arr.Length).SequenceEqual(arr));
         }
 
         [Test]
-        public void test2()
+        public void CanRepeatEachItemManyTimes()
         {
-            var seq = new[] { "Ronnie", "Shane", "Brittney", "Anna", "Tina", "Lukus" };
+            const int times = 25;
+            var rp = _people.RepeatEach(times);
+            var list = new List<string>(_people.Length*times);
 
-            var r = RandomHelper.Instance;
-            var repSeq = seq.RepeatEach(x => r.Next(2)).ToArray();
+            foreach (var p in _people)
+                for (var i = 0; i < times; i++)
+                    list.Add(p);
+
+            Assert.True(rp.SequenceEqual(list));
+        }
+
+        [Test]
+        public void CanRepeatEachItemVariableTimes()
+        {
+            // items that are 5 characters are repeated twice
+            var rp = _people.RepeatEach(p => p.Length == 5 ? 2 : 1);
+            var list = new List<string>(_people.Length + _people.Count(x => x.Length == 5));
+
+            foreach (var p in _people)
+            {
+                list.Add(p);
+                if (p.Length == 5)
+                    list.Add(p);
+            }
+
+            Assert.True(rp.SequenceEqual(list));
+        }
+
+        [Test]
+        public void CanEnumerateRepeatedly()
+        {
+            var rep = _people.EnumerateRepeatedly().Take(_people.Length*3);
+            Assert.True(rep.SequenceEqual(_people.Concat(_people).Concat(_people)));
+
+        }
+
+        [Test]
+        public void CanSelectRepeatedly()
+        {
+            // not a great test.... just checking interface existence I guess.....
+            var seq = Enumerable.Range(1, 1000).ToArray();
+            var randoms = seq.SelectOneRepeatedly(x => x.RandomElement()).Take(10000);
+            var shuffles = seq.SelectRepeatedly(x => x.Shuffle()).Take(10000);
+            Assert.False(randoms.SequenceEqual(shuffles));
         }
 
         [Test]
         public void BiasTest1()
         {
-            var seq = new Dictionary<string, int>
-                {
-                    {"Ronnie", 200},
-                    {"Shane", 2},
-                    {"Brittney", 1}
-                };
+            var biasDef = _people.ToDictionary(x => x, x => RandomHelper.Instance.Next(100));
 
-            var vals = seq.Keys.RepeatEach(x => seq[x]).SelectRepeatedly(x => x.RandomElement()).Take(seq.Values.Sum() * 1000).ToArray();
+            var vals = _people.RepeatEach(x => biasDef[x])//.ToArray()
+                              .SelectRepeatedly(x => x.Shuffle())
+                              .Take(100);
+
             var rep = vals
-                         .GroupBy(x => x)
-                         .Select(x => new
-                             {
-                                 x.Key,
-                                 Count = x.Count()
-                             }).ToArray();
-
+                .GroupBy(x => x)
+                .Select(x => new {x.Key, Count = x.Count()})
+                .OrderBy(x=>x.Count).ToArray();
         }
+
+
 
         [Test]
         public void BiasTest2()
         {
-            var seq = new Biaser<string>
-                {
-                    {"Ronnie", 200},
-                    {"Shane", 2},
-                    {"Brittney", 1} // normally not needed. default bias factor is 1. but using keys as source enumerable
-                };
+            var biasDef = _people.ToDictionary(x => x, x => RandomHelper.Instance.Next(100));
 
-            var vals = seq.Keys.RepeatEach(x => seq[x]).SelectRepeatedly(x => x.RandomElement()).Take(seq.Values.Sum() * 1000).ToArray();
+            var vals = _people.RepeatEach(x => biasDef[x])//.ToArray()
+                              .SelectRepeatedly(x => x.Shuffle())
+                              .Take(100);
+
             var rep = vals
-                         .GroupBy(x => x)
-                         .Select(x => new
-                             {
-                                 x.Key,
-                                 Count = x.Count()
-                             }).ToArray();
-
+                .GroupBy(x => x)
+                .Select(x => new {x.Key, Count = x.Count()})
+                .OrderBy(x=>x.Count).ToArray();
         }
-    }
-}
 
-public class Biaser<T> : Dictionary<T, int>
-{
-    // need function that takes in enumerable
-    // returns a random element determined by
-    // bias factors
 
-    public T RandomElement(IEnumerable<T> enumerable = null)
-    {
-        enumerable = enumerable ?? Keys;
-
-        // select one of the this.Keys (or something representing a default) according to its bias
-        // if key was selected, return it
-        // if default was selected return any other item in the enumerable
-
-        // IDK about all this
-
-        // ORRRR
-
-        // treat bias factors as markings on a spectrum like: (may need to subtract 1 from all bias factors to reconcile with unbiased elements)
-        // ----------10------------20----------------------------------------------100---------------------
-
-        // and multiply the sum of the bias factors by random double between 0 and 1
-
-        // if zero then default (random element)
-        // else if <= 10 then take that one
-        // etc
     }
 }

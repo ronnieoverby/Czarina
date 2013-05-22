@@ -6,14 +6,22 @@ namespace Czarina.Generator
 {
     public static class Extensions
     {
-        public static IEnumerable<T> SelectRepeatedly<T>(this IEnumerable<T> source, Func<IEnumerable<T>, IEnumerable<T>> func)
+        /// <summary>
+        /// Repeatedly invokes the delegate for each item in the enumeration, yielding the results.
+        /// </summary>
+        public static IEnumerable<T> SelectRepeatedly<T, TSource>(this TSource source, Func<TSource, IEnumerable<T>> func)
+            where TSource:IEnumerable<T>
         {
             while (true)
                 foreach (var item in func(source))
                     yield return item;
         }
 
-        public static IEnumerable<T> SelectRepeatedly<T>(this IEnumerable<T> source, Func<IEnumerable<T>, T> func)
+        /// <summary>
+        /// Repeatedly invokes the delegate, yielding the result.
+        /// </summary>
+        public static IEnumerable<T> SelectOneRepeatedly<T, TSource>(this TSource source, Func<TSource, T> func)
+            where TSource : IEnumerable<T>
         {
             while (true) yield return func(source);
         }
@@ -63,9 +71,9 @@ namespace Czarina.Generator
         }
 
         /// <summary>
-        /// Repeatedly invokes the delegate and yields it's results.
+        /// Repeatedly invokes the delegate and flattening and yielding it's results.
         /// </summary>
-        public static IEnumerable<T> EnumerateRepeatedly<T>(this Func<IEnumerable<T>> source)
+        public static IEnumerable<T> InvokeRepeatedly<T>(this Func<IEnumerable<T>> source)
         {
             while (true)
                 foreach (var item in source())
@@ -77,9 +85,12 @@ namespace Czarina.Generator
         /// </summary>
         public static IEnumerable<T> EnumerateRepeatedly<T>(this IEnumerable<T> source)
         {
-            return new Func<IEnumerable<T>>(() => source).EnumerateRepeatedly();
+            return new Func<IEnumerable<T>>(() => source).InvokeRepeatedly();
         }
 
+        /// <summary>
+        /// Invokes countFunc for each element, yielding the element the resulting number of times.
+        /// </summary>
         public static IEnumerable<T> RepeatEach<T>(this IEnumerable<T> source, Func<T, int> countFunc)
         {
             return source.SelectMany(x =>
@@ -89,6 +100,9 @@ namespace Czarina.Generator
                 });
         }
 
+        /// <summary>
+        /// Yields each element the specified number of times
+        /// </summary>
         public static IEnumerable<T> RepeatEach<T>(this IEnumerable<T> source, int count)
         {
             return source.RepeatEach(x => count);
