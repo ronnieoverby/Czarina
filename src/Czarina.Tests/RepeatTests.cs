@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Czarina.Generator;
 using NUnit.Framework;
 using System.Linq;
@@ -8,13 +7,13 @@ namespace Czarina.Tests
 {
     public class RepeatTests
     {
-        private readonly string[] _people = new[] {"Ronnie", "Shane", "Brittney", "Tina", "Anna", "Lukus"};
+        private readonly string[] _people = new[] { "Ronnie", "Shane", "Brittney", "Tina", "Anna", "Lukus" };
 
         [Test]
         public void CanRepeatMyName()
         {
             const string name = "Ronnie";
-            var arr = new[] {name, name, name};
+            var arr = new[] { name, name, name };
             Assert.True(name.Repeat().Take(arr.Length).SequenceEqual(arr));
         }
 
@@ -23,7 +22,7 @@ namespace Czarina.Tests
         {
             const int times = 25;
             var rp = _people.RepeatEach(times);
-            var list = new List<string>(_people.Length*times);
+            var list = new List<string>(_people.Length * times);
 
             foreach (var p in _people)
                 for (var i = 0; i < times; i++)
@@ -52,7 +51,7 @@ namespace Czarina.Tests
         [Test]
         public void CanEnumerateRepeatedly()
         {
-            var rep = _people.EnumerateRepeatedly().Take(_people.Length*3);
+            var rep = _people.EnumerateRepeatedly().Take(_people.Length * 3);
             Assert.True(rep.SequenceEqual(_people.Concat(_people).Concat(_people)));
 
         }
@@ -68,37 +67,20 @@ namespace Czarina.Tests
         }
 
         [Test]
-        public void BiasTest1()
+        public void BiasTest()
         {
-            var biasDef = _people.ToDictionary(x => x, x => RandomHelper.Instance.Next(100));
+            var biasDef = _people.ToDictionary(x => x, x => RandomHelper.Instance.Next(1000));
 
-            var vals = _people.RepeatEach(x => biasDef[x])//.ToArray()
+            var vals = _people.RepeatEach(x => biasDef[x]).ToArray()
                               .SelectRepeatedly(x => x.Shuffle())
-                              .Take(100);
+                              .Take(1000).ToArray();
 
             var rep = vals
                 .GroupBy(x => x)
-                .Select(x => new {x.Key, Count = x.Count()})
-                .OrderBy(x=>x.Count).ToArray();
+                .Select(x => new { x.Key, Count = x.Count() })
+                .OrderByDescending(x => x.Count).ToArray();
         }
-
-
-
-        [Test]
-        public void BiasTest2()
-        {
-            var biasDef = _people.ToDictionary(x => x, x => RandomHelper.Instance.Next(100));
-
-            var vals = _people.RepeatEach(x => biasDef[x])//.ToArray()
-                              .SelectRepeatedly(x => x.Shuffle())
-                              .Take(100);
-
-            var rep = vals
-                .GroupBy(x => x)
-                .Select(x => new {x.Key, Count = x.Count()})
-                .OrderBy(x=>x.Count).ToArray();
-        }
-
-
     }
+
+   
 }

@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MemberNameCollector.cs" />
+    <Compile Include="RangeTests.cs" />
     <Compile Include="RepeatTests.cs" />
     <Compile Include="SamplesTests.cs" />
     <Compile Include="XML.Designer.cs">
